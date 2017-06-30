@@ -1,0 +1,161 @@
+<krpano
+        version="1.19"
+        basedir="%FIRSTXML%"
+        bgcolor="0x000000"
+        idletime="0.5"
+        colorcorrection="default"
+        logkey="true"
+        strict="false"
+        debugmode="true">
+
+
+    <!-- video 插件 include the videoplayer plugin and load the video (use a low res video for iOS) -->
+    <!-- videourl.ios="%$videourl_1920x860%.m3u8|%$soundurl%.mp3" -->
+    <plugin name="video"
+            devices="all"
+            url.flash="plugins/videoplayer.swf"
+            url.html5="plugins/videoplayer.js"
+
+            posterurl.ios="%$posterurl_low%.jpg"
+            posterurl.no-ios="%$posterurl_low%.jpg"
+
+            videourl.ios="%$videourl_low%.mp4|%$soundurl%.mp3"
+            videourl.no-ios="%$videourl_high%.mp4"
+
+            pausedonstart="true"
+            loop="fase"
+            enabled="true"
+            zorder="0"
+            align="center"
+            ox="0"
+            oy="0"
+            width.no-panovideosupport="100%"
+            height.no-panovideosupport="prop"
+
+            onloaded="videointerface_setup_interface(get(name));"
+            onvideoready="videointerface_videoready();"/>
+
+    <image devices="panovideosupport">
+        <sphere url="plugin:video"/>
+    </image>
+
+    <!-- start mask 遮罩层 解决 iphone 触摸才能播放的问题 -->
+    <style name="videointerface_maskimage" url="/js/vr/skin/dragtip.gif"/>
+    <layer name="videointerface_mask_container" keep="true"
+           zorder="5"
+           type="container"
+           bgcolor="0x000000"
+           bgcapture="true"
+           bgalpha="0.75"
+           bgborder=""
+           bgroundedge="0"
+           bgshadow=""
+           handcursor="false"
+           align="center"
+           width="100%" maxwidth="" minwidth="100"
+           y="0"
+           height="100%"
+           onclick="videointerface_hide_mask()">
+        <layer name="videointerface_mask_image"
+               style="videointerface_maskimage"
+               align="center"
+               visible="true"
+               alpha="1"
+               height="100"
+               width="100"
+               onclick="videointerface_hide_mask()"/>
+    </layer>
+    <action name="videointerface_hide_mask">
+        set(layer[videointerface_mask_container].visible, false);
+    </action>
+    <!-- end mask -->
+
+    <include url="%SWFPATH%/skin/videointerface.xml"/>
+    <layer name="videointerface_pp_image"
+           zorder="2"
+           style="videointerface_pauseimage"
+           crop="0|200|200|200"
+           onovercrop=""
+           ondowncrop=""
+           align="center"
+           visible="false"
+           alpha="0.0"
+           scale="0.2"
+           height="100"
+           width="100"
+           ondown="videointerface_togglepause();"/>
+
+    <style name="videointerface_pauseimage" url="skin/videointerface_playpause.png"/>
+    <action name="videointerface_togglepause">
+        trace(posterurl_low);
+        plugin[get(videointerface_video)].togglepause();
+    </action>
+
+    <!-- 补地logo -->
+    <!-- events - update logo rotation with pano rotation -->
+    <events name="nadirlogorotation" keep="true"
+            onviewchange="if(hotspot[nadirlogo].rotatewithview,set(hotspot[nadirlogo].rotate,get(view.hlookat)));"/>
+    <hotspot name="nadirlogo" keep="true"
+             url="%SWFPATH%/skin/logo2.png"
+             ath="0"
+             atv="90"
+             distorted="true"
+             scale="1.0"
+             rotate="0.0"
+             rotatewithview="true"
+             onclick=""/>
+    <hotspot name="nadirlogo2" keep="true"
+             url="%SWFPATH%/skin/logo2.png"
+             ath="0"
+             atv="-90"
+             distorted="true"
+             scale="1.0"
+             rotate="0.0"
+             rotatewithview="true"
+             onclick=""/>
+
+    <!--<action name="no_pano_video_error" autorun="onstart" devices="no-panovideosupport">-->
+    <!--error("对不起，您的浏览器不支持全景视频!");-->
+    <!--</action>-->
+
+
+    <!-- 视频质量 custom control setup - add items for selecting videos with a different resolution/quality -->
+    <action name="setup_video_controls">
+        videointerface_addmenuitem(configmenu, vqtitle, '选择视频清晰度', true, videointerface_toggle_configmenu() );
+        videointerface_addmenuitem(
+        configmenu,
+        q1,
+        '960x480',
+        false,
+        change_video_file(q1, '%$videourl_low%.mp4|%$soundurl%.mp3');
+        );
+        videointerface_addmenuitem(
+        configmenu,
+        q2,
+        '1920x860',
+        false,
+        change_video_file(
+        q2,
+        '%$videourl_high%.mp4|%$soundurl%.mp3'
+        );
+        );
+
+        if(device.ios,
+        videointerface_selectmenuitem(configmenu, q1);
+        ,
+        videointerface_selectmenuitem(configmenu, q2);
+        );
+    </action>
+
+    <!-- change the video file, but try keeping the same playback position -->
+    <action name="change_video_file">
+        plugin[video].playvideo('%CURRENTXML%/%2', null, get(plugin[video].ispaused), get(plugin[video].time));
+        videointerface_deselectmenuitem(configmenu, q1);
+        videointerface_deselectmenuitem(configmenu, q2);
+        videointerface_selectmenuitem(configmenu, %1);
+    </action>
+
+    <!-- set the default view - a light fisheye projection -->
+    <view hlookat="0" vlookat="0" fovtype="DFOV" fov="0" fovmin="75" fovmax="150" fisheye="0.00"
+          pannini="false"/>
+</krpano>

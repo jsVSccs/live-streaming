@@ -1,0 +1,222 @@
+<krpano
+        version="1.19"
+        basedir="%FIRSTXML%"
+        bgcolor="0x000000"
+        idletime="0.5"
+        colorcorrection="default"
+        logkey="true"
+        strict="false"
+        showerrors="true"
+        debugmode="true">
+
+    <!-- start mask 遮罩层 解决 iphone 触摸才能播放的问题 -->
+    <style name="videointerface_maskimage" url="skin/dragtip.gif"/>
+    <layer name="videointerface_mask_container" keep="true"
+           zorder="5"
+           type="container"
+           bgcolor="0x009944"
+           bgcapture="true"
+           bgalpha="0.75"
+           bgborder=""
+           bgroundedge="0"
+           bgshadow=""
+           handcursor="false"
+           align="center"
+           width="100%" maxwidth="" minwidth="100"
+           y="0"
+           height="100%"
+           onclick="videointerface_hide_mask()"
+
+            >
+        <layer name="videointerface_mask_image"
+               style="videointerface_maskimage"
+               align="center"
+               visible="true"
+               alpha="1"
+               height="150"
+               width="150"
+               onclick="videointerface_hide_mask()"/>
+    </layer>
+    <action name="videointerface_hide_mask">
+        set(layer[videointerface_mask_container].visible, false);
+    </action>
+    <!-- end mask -->
+
+
+    <!-- video 插件 include the videoplayer plugin and load the video (use a low res video for iOS) -->
+    <!-- videourl.ios="%$videourl_1920x860%.m3u8|%$soundurl%.mp3" -->
+    <!-- posterurl="%$posterurl_low%.jpg" -->
+    <plugin name="video"
+            devices="all"
+            url.flash="plugins/videoplayer.swf"
+            url.html5="plugins/videoplayer.js"
+
+            videourl.ios="%$videourl_low%.mp4|%$soundurl%.mp3"
+            videourl.no-ios="%$videourl_high%.mp4"
+
+            videoUrl1="1"
+            pausedonstart="true"
+            loop="false"
+            enabled="true"
+            zorder="0"
+            align="center"
+            ox="0"
+            oy="0"
+            width.no-panovideosupport="100%"
+            height.no-panovideosupport="prop"
+            onloaded="videointerface_setup_interface(get(name));jsget(videoUrl1,'  window.currentNum ');"
+            onvideoready="videointerface_videoready();"
+            onvideocomplete="videointerface_videocomplete();"
+            onvideopaused="videoonpause();"
+            />
+    <action name="videoonpause">
+        <!--showlog();-->
+    </action>
+    <!-- 加载webvr插件配置  add/overwrite some settings from the webvr.xml for this example -->
+    <include url="plugins/webvr.xml" />
+    <plugin name="webvr" devices="html5" keep="true"
+            url="plugins/webvr.js"
+            worldscale="1.0"
+            mobilevr_fake_support="false"
+            mobilevr_support="true"
+            mousespeed="0.00125"
+            multireslock="true"
+            mobilevr_ipd="63.5"
+            mobilevr_screensize="auto"
+            mobilevr_lens_overlap="1.0"
+            mobilevr_lens_fov="96"
+            mobilevr_lens_dist="0.6"
+            mobilevr_lens_dist2="1|0|0|0"
+            mobilevr_lens_ca="0.0"
+            mobilevr_lens_vign="100"
+            mobilevr_webvr_dist="true"
+            mobilevr_wakelock="true"
+            mobilevr_sensor_mode="3"
+            mobilevr_autocalibration="true"
+            mobilevr_touch_support="false"
+            onavailable="set(layer[webvr_enterbutton].alpha, 1);"
+            onentervr="set(layer[webvr_enterbutton].alpha, 0);"
+            onexitvr="set(layer[webvr_enterbutton].alpha, 1);"/>
+
+    <!-- the EnterVR/ExitVR and SetupVR buttons -->
+    <style name="webvr_button_style"
+           url="plugins/textfield.swf"
+           backgroundcolor="0x000000"
+           backgroundalpha="0.5"
+           roundedge="1"
+           css="calc:'color:#FFFFFF;font-size:' + 14*webvr_setup_scale*webvr_button_scale + 'px;'"
+           padding="calc:3*webvr_setup_scale*webvr_button_scale + ' ' + 5*webvr_setup_scale*webvr_button_scale"
+            />
+    <layer name="webvr_enterbutton" keep="true"
+           vr="true"
+           style="webvr_button_style"
+           url="skin/eye.png"
+           align="bottom"
+           x="0"
+           y="0"
+           zorder="3"
+           width="36"
+           height="36"
+           autoalpha="true"
+           alpha="0.0"
+           onclick="plugin[webvr].entervr();"/>
+    <!--html="进入VR模式"-->
+    <events onkeydown="if(plugin[webvr].isenabled == true AND keycode == 27, plugin[webvr].exitvr());" />
+
+    <!-- enable the FAKE VR support to allow testing also on desktop and tablets without VR support -->
+    <!-- <layer name="webvr_enterbutton"
+          ondown="video_auto_start();" /> -->
+
+
+    <include url="skin/videointerface-live.xml"/>
+    <!-- <include url="skin/videointerface.xml"/> -->
+    <layer name="videointerface_pp_image"
+           zorder="2"
+           style="videointerface_pauseimage"
+           crop="0|200|200|200"
+           onovercrop=""
+           ondowncrop=""
+           align="center"
+           visible="false"
+           alpha="0.0"
+           scale="0.2"
+           height="100"
+           width="100"
+           ondown="videointerface_togglepause();"
+            />
+    <style name="videointerface_pauseimage" url="skin/videointerface_playpause.png"/>
+    <action name="videointerface_togglepause">
+        plugin[get(videointerface_video)].togglepause();
+    </action>
+
+    <image devices="panovideosupport">
+        <sphere url="plugin:video"/>
+    </image>
+
+    <!-- 补地logo -->
+    <!-- events - update logo rotation with pano rotation -->
+<!--     <events name="nadirlogorotation" keep="true"
+            onviewchange="if(hotspot[nadirlogo].rotatewithview,set(hotspot[nadirlogo].rotate,get(view.hlookat)));"/>
+    <hotspot name="nadirlogo" keep="true"
+             url="skin/logo2.png"
+             ath="0"
+             atv="90"
+             distorted="true"
+             scale="1.0"
+             rotate="0.0"
+             rotatewithview="true"
+             onclick=""/>
+    <hotspot name="nadirlogo2" keep="true"
+             url="skin/logo2.png"
+             ath="0"
+             atv="-90"
+             distorted="true"
+             scale="1.0"
+             rotate="0.0"
+             rotatewithview="true"
+             onclick=""/> -->
+
+    <!--<action name="no_pano_video_error" autorun="onstart" devices="no-panovideosupport">-->
+    <!--error("对不起，您的浏览器不支持全景视频!");-->
+    <!--</action>-->
+
+
+    <!-- 视频质量 custom control setup - add items for selecting videos with a different resolution/quality -->
+    <action name="setup_video_controls">
+        videointerface_addmenuitem(configmenu, vqtitle, '选择视频清晰度', true, videointerface_toggle_configmenu() );
+        videointerface_addmenuitem(
+        configmenu,
+        q1,
+        '960x480',
+        false,
+        change_video_file(q1, '%$videourl_low%.mp4|%$soundurl%.mp3');
+        );
+        videointerface_addmenuitem(
+        configmenu,
+        q2,
+        '1920x860',
+        false,
+        change_video_file(
+        q2,
+        '%$videourl_high%.mp4|%$soundurl%.mp3'
+        );
+        );
+
+        if(device.ios,
+        videointerface_selectmenuitem(configmenu, q1);
+        ,
+        videointerface_selectmenuitem(configmenu, q2);
+        );
+    </action>
+
+    <!-- change the video file, but try keeping the same playback position -->
+    <action name="change_video_file">
+        plugin[video].playvideo('%CURRENTXML%/%2', null, get(plugin[video].ispaused), get(plugin[video].time));
+        videointerface_deselectmenuitem(configmenu, q1);
+        videointerface_deselectmenuitem(configmenu, q2);
+        videointerface_selectmenuitem(configmenu, %1);
+    </action>
+
+    <!-- set the default view - a light fisheye projection -->
+    <view hlookat="0" vlookat="0" fovtype="DFOV" fov="130" fovmin="75" fovmax="150" fisheye="0.35"/>
+</krpano>

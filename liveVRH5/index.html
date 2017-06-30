@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>独家VR直播|邀你亲临中传2017届毕业典礼现场</title>
+    <style type="text/css">
+        @-ms-viewport {
+            width: device-width;
+        }
+    </style>
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <!--[if lte IE 8]>
+      <p class="browsehappy">您正在使用 <strong>过时的</strong> 浏览器. 请 <a href="http://browsehappy.com/">更新您的浏览器</a> 来增加您的上网体验.</p>
+    <![endif]-->
+
+    <script src="./js/vr/krpano.js"></script>
+    <script src="./js/jquery-2.1.4.min.js"></script>
+    <script src="./js/retina.js"></script>
+
+    <!-- content -->
+    <div class="container">
+        <h1 class="maintitle">
+            <img src="./images/header.png" alt="">
+        </h1>
+        <!-- <div class="mainimg">
+            <img src="./images/girls.png" alt="">
+        </div> -->
+        <div class="stageWraper">
+            <div class="stage">
+              <i class="p_l"></i>
+              <i class="p_r"></i>
+              <i class="p_t"></i>
+              <i class="p_b"></i>
+              <div class="screen_bg">
+                <div id="pano">
+                  <noscript>请开启 javascript</noscript>
+                </div>
+              </div>
+            </div>
+        </div>
+        <footer class="footer">
+            <img src="./images/footer.png" alt="">
+        </footer>
+    </div>
+    <!-- end content -->
+
+    <script>
+        var u = navigator.userAgent;
+        var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+        var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+        window.currentNum = "";
+        var timer="";
+        window.base = "http://"+document.domain+"/mp4/";
+//      $.ajax({url:"http://h5.7d-vision.com/new.php",success:function(data){
+//          currentNum=data;
+//      },async: false})
+        var src = "http://static.hongshiyun.net/demo/demo.mp4";// = base+currentNum;
+        var settings = {};
+        settings["onstart"] = "trace('this is a js traced on start...')";
+        settings["posterurl_low"] = "../../images/img";
+        settings["posterurl_high"] = "../../images/img";
+        settings["videourl_low"] = src;
+        settings["videourl_high"] =src;
+
+        if(isiOS){
+            settings["soundurl"] =src;
+        }
+
+        if (!document.domain) {
+            var errmsg = 'Error';
+        } else {
+            embedpano({
+                vars: settings,
+                swf: "js/vr/krpano.swf",
+                id: "krpanoSWFObject",
+                xml: "js/vr/vrlive.xml",
+                target: "pano",
+                mobilescale: 0.4,
+                passQueryParameters: true,
+                bgcolor: "#009944",
+                html5: "prefer",
+                webglsettings: {
+                    preserveDrawingBuffer: false,
+                    depth: false,
+                    stencil: false
+                }
+            });
+        }
+
+        function selecthtml5usage() {
+            if (navigator.userAgent.indexOf("Android") >= 0 && navigator.userAgent.indexOf("QQ") >= 0) {
+                return "auto+css3d"
+            } else {
+                return "auto";
+            }
+        }
+
+        // console.log(isiOS);
+        if (isAndroid || isiOS) {
+            var winWidth = $(window).width();
+            var winHeight = $(window).height();
+            if (winWidth > winHeight) {
+                $("#krpanoSWFObject").css({
+                    'position':'fixed',
+                    'top':0,
+                    'bottom':0,
+                    'left':0,
+                    'right':0
+                })
+            } else {
+                $("#krpanoSWFObject").css({
+                    'position':'relative',
+                    'top':'auto',
+                    'bottom':'auto',
+                    'left':'auto',
+                    'right':'auto'
+                })
+            }
+            $(window).resize(function () {
+                var winWidth = $(window).width();
+                var winHeight = $(window).height();
+                if (winWidth > winHeight) {
+                    $("#krpanoSWFObject").css({
+                        'position':'fixed',
+                        'top':0,
+                        'bottom':0,
+                        'left':0,
+                        'right':0
+                    })
+                } else {
+                    $("#krpanoSWFObject").css({
+                        'position':'relative',
+                        'top':'auto',
+                        'bottom':'auto',
+                        'left':'auto',
+                        'right':'auto'
+                    })
+                }
+            })
+        }
+    </script>
+
+
+  </body>
+</html>
